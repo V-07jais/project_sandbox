@@ -26,6 +26,9 @@ SECRET_KEY = 'django-insecure-)1=hgcbas1++@$s1)(n$$z6i!b%+y_u2n!jxyb=cb442we_p_f
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'https://project-sandbox.onrender.com',
+]
 
 
 # Application definition
