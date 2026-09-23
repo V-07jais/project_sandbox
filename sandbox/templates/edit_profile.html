@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - Sandbox{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-slate-900/80 border border-slate-800 rounded-2xl p-8 shadow-xl">
+  <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+    <i data-lucide="user-check" class="w-6 h-6 text-indigo-400"></i> Edit Profile Information
+  </h2>
+  <p class="text-slate-400 text-sm mb-6">Personalize your developer profile and social links.</p>
+
+  <form method="POST" action="/profile/edit/" class="space-y-5">
+    {% csrf_token %}
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1">Bio / Short Intro</label>
+      <textarea name="bio" rows="3" placeholder="e.g. Computer Science undergraduate working on interactive web applications..." 
+                class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500">{{ profile.bio|default:'' }}</textarea>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1">Skills (comma separated)</label>
+      <input type="text" name="skills" value="{{ profile.skills|default:'' }}" placeholder="e.g. React, Django, Python, Tailwind" 
+             class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1">GitHub Profile Link</label>
+      <input type="url" name="github_url" value="{{ profile.github_url|default:'' }}" placeholder="https://github.com/username" 
+             class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1">LinkedIn Profile Link</label>
+      <input type="url" name="linkedin_url" value="{{ profile.linkedin_url|default:'' }}" placeholder="https://linkedin.com/in/username" 
+             class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+    </div>
+
+    <div class="flex gap-4 pt-2">
+      <a href="/profile/" class="w-1/3 text-center bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-3 rounded-lg transition-all">Cancel</a>
+      <button type="submit" class="w-2/3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition-all shadow-lg shadow-indigo-600/30">
+        Save Profile
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

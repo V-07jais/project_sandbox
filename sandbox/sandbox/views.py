@@ -1,6 +1,6 @@
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
-from core.models import Project
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Projectt
 
 # Homepage
 def home(request):
@@ -20,6 +20,23 @@ def course_detail(request, courseid):
 
 # Show all projects
 def projects(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        link = request.POST.get("link")
+
+        if title and description:
+            # Agar user logged in hai toh associate hoga, varna basic setup ke liye default
+            user = request.user if request.user.is_authenticated else None
+            if user:
+                Project.objects.create(
+                    user=user,
+                    title=title,
+                    description=description,
+                    link=link
+                )
+                return redirect('/')
+
     return render(request, "projects.html")
 
 # Show single project

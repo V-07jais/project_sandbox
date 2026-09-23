@@ -1,54 +1,68 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
+{% block title %}Sandbox - Explore All Projects{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2>All Projects</h2>
+<div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+  <div>
+    <h1 class="text-3xl font-extrabold text-white">Community Projects</h1>
+    <p class="text-slate-400 text-sm mt-1">Browse and filter builds shared by all developers.</p>
+  </div>
 
-    <!-- Filters -->
-    <form method="get" class="mb-4">
-        <select name="language">
-            {% for lang in languages %}
-                <option value="{{ lang }}" {% if lang == selected_language %}selected{% endif %}>{{ lang }}</option>
-            {% endfor %}
-        </select>
+  <!-- Filter & Search Controls -->
+  <form method="GET" action="/projects/" class="flex flex-wrap items-center gap-3">
+    <div class="relative">
+      <input type="text" name="q" value="{{ query }}" placeholder="Search projects..." 
+             class="bg-slate-900 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 w-48 sm:w-64">
+    </div>
 
-        <select name="database">
-            {% for db in databases %}
-                <option value="{{ db }}" {% if db == selected_database %}selected{% endif %}>{{ db }}</option>
-            {% endfor %}
-        </select>
+    <select name="sort" onchange="this.form.submit()" 
+        class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+  <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
+  <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+  <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Most Liked 🔥</option>
+</select>
 
-        <select name="origin">
-            {% for org in origins %}
-                <option value="{{ org }}" {% if org == selected_origin %}selected{% endif %}>{{ org }}</option>
-            {% endfor %}
-        </select>
+    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
+      Filter
+    </button>
+  </form>
+</div>
 
-        <button type="submit" class="btn btn-primary">Filter</button>
-    </form>
-
-    <!-- Project list -->
-    {% if projects %}
-        <div class="row">
-            {% for project in projects %}
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ project.title }}</h5>
-                            <p class="card-text">{{ project.description|truncatewords:20 }}</p>
-                        </div>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item"><strong>Language:</strong> {{ project.language }}</li>
-                            <li class="list-group-item"><strong>Database:</strong> {{ project.database }}</li>
-                            <li class="list-group-item"><strong>Origin:</strong> {{ project.origin }}</li>
-                            <li class="list-group-item"><strong>Author:</strong> {{ project.author.username }}</li>
-                        </ul>
-                    </div>
-                </div>
-            {% endfor %}
+<!-- All Projects Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {% for project in projects %}
+    <div class="bg-slate-900/60 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            @{{ project.user.username }}
+          </span>
+          <span class="text-xs text-slate-500">{{ project.created_at|date:"M d, Y" }}</span>
         </div>
-    {% else %}
-        <p>No projects yet.</p>
-    {% endif %}
+        <h3 class="text-xl font-bold text-white mb-2">{{ project.title }}</h3>
+        <p class="text-slate-400 text-sm line-clamp-3 mb-6">{{ project.description }}</p>
+      </div>
+
+      <div class="flex items-center justify-between pt-4 border-t border-slate-800/80">
+        {% if project.link %}
+          <a href="{{ project.link }}" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Live Demo
+          </a>
+        {% else %}
+          <span class="text-xs text-slate-600">No Link</span>
+        {% endif %}
+        <a href="/project/{{ project.id }}/" class="text-sm font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+          Details <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-span-full py-16 text-center bg-slate-900/30 border border-dashed border-slate-800 rounded-2xl">
+      <i data-lucide="search-x" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+      <h3 class="text-lg font-semibold text-slate-300 mb-1">No Projects Found</h3>
+      <p class="text-slate-500 text-sm">Try changing your search query or filters.</p>
+    </div>
+  {% endfor %}
 </div>
 {% endblock %}

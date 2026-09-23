@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Explore Projects - Sandbox{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+    <div>
+      <h1 class="text-3xl font-bold text-white flex items-center gap-2">
+        <i data-lucide="compass" class="w-8 h-8 text-indigo-500"></i> Explore Projects
+      </h1>
+      <p class="text-slate-400 text-sm mt-1">Discover showcase builds, open-source work, and community projects.</p>
+    </div>
+
+    <!-- Add Project CTA Button -->
+    {% if user.is_authenticated %}
+      <a href="/add-project/" class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all text-sm w-fit">
+        <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Project
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Search & Filter Controls Bar -->
+  <form method="GET" action="/projects/" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <!-- Search Input -->
+    <div class="md:col-span-3 relative">
+      <i data-lucide="search" class="w-5 h-5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+      <input type="text" name="q" value="{{ query }}" placeholder="Search by title, description, or tech stack (e.g. Django, React)..." 
+             class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-11 pr-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-all">
+    </div>
+
+    <!-- Sorting Dropdown -->
+    <div class="flex items-center gap-2">
+      <select name="sort" onchange="this.form.submit()" 
+              class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition-all">
+        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
+        <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+        <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Most Liked 🔥</option>
+      </select>
+    </div>
+  </form>
+
+  <!-- Projects Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for project in projects %}
+      <div class="bg-slate-900/60 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all group shadow-sm hover:shadow-indigo-500/5">
+        <div>
+          <!-- Header Meta Info -->
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              @{{ project.user.username }}
+            </span>
+            <span class="text-xs text-slate-500">
+              {{ project.created_at|date:"M d, Y" }}
+            </span>
+          </div>
+
+          <!-- Project Title -->
+          <h3 class="text-xl font-bold text-white group-hover:text-indigo-400 transition-colors mb-2">
+            <a href="/project/{{ project.id }}/">{{ project.title }}</a>
+          </h3>
+
+          <!-- Description -->
+          <p class="text-slate-400 text-sm line-clamp-3 mb-4 leading-relaxed">
+            {{ project.description }}
+          </p>
+
+          <!-- Tech Stack Tags -->
+          {% if project.tech_stack %}
+            <div class="flex flex-wrap gap-1.5 mb-6">
+              {% for tag in project.tech_stack.split %}
+                <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-indigo-300 font-mono border border-slate-700/60">
+                  #{{ tag }}
+                </span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Footer Actions (Upvote, Demo Link & Details) -->
+        <div class="flex items-center justify-between pt-4 border-t border-slate-800/80">
+          <div class="flex items-center gap-4">
+            <!-- Upvote Button -->
+            <a href="/project/{{ project.id }}/like/" 
+               class="flex items-center gap-1.5 text-xs font-semibold transition-colors {% if user in project.likes.all %}text-rose-500{% else %}text-slate-400 hover:text-rose-400{% endif %}">
+              <i data-lucide="heart" class="w-4 h-4 {% if user in project.likes.all %}fill-rose-500{% endif %}"></i>
+              <span>{{ project.total_likes }}</span>
+            </a>
+
+            <!-- Demo Link -->
+            {% if project.link %}
+              <a href="{{ project.link }}" target="_blank" rel="noopener noreferrer" 
+                 class="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Live
+              </a>
+            {% endif %}
+          </div>
+
+          <!-- Details Link -->
+          <a href="/project/{{ project.id }}/" class="text-sm font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
+            Details <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-span-full py-16 text-center bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl">
+        <i data-lucide="folder-search" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+        <h3 class="text-lg font-semibold text-slate-300 mb-1">No Projects Found</h3>
+        <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">
+          {% if query %}
+            No builds matched your search query "{{ query }}". Try searching with different keywords.
+          {% else %}
+            Be the first one to share a project on Sandbox!
+          {% endif %}
+        </p>
+        {% if user.is_authenticated %}
+          <a href="/add-project/" class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all">
+            + Publish a Project
+          </a>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
